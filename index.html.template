@@ -1,14 +1,277 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Krkn Chaos Demo</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>WebApp Status</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: rgba(255, 255, 255, 0.08);
+      --panel-border: rgba(255, 255, 255, 0.12);
+      --text: rgba(255, 255, 255, 0.92);
+      --muted: rgba(255, 255, 255, 0.68);
+      --accent: #7c3aed;
+      --ok: #22c55e;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      --radius: 16px;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f7fb;
+        --panel: rgba(255, 255, 255, 0.9);
+        --panel-border: rgba(15, 23, 42, 0.10);
+        --text: rgba(15, 23, 42, 0.92);
+        --muted: rgba(15, 23, 42, 0.64);
+        --shadow: 0 18px 50px rgba(2, 6, 23, 0.12);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 20% 10%, rgba(124, 58, 237, 0.28), transparent 55%),
+        radial-gradient(700px 450px at 80% 15%, rgba(34, 197, 94, 0.18), transparent 60%),
+        radial-gradient(900px 600px at 50% 90%, rgba(59, 130, 246, 0.14), transparent 60%),
+        var(--bg);
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 28px 16px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 880px;
+      display: grid;
+      gap: 16px;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(24px, 3.6vw, 36px);
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .brand p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-inner { padding: 18px; }
+    @media (min-width: 720px) { .card-inner { padding: 22px; } }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--panel-border);
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: color-mix(in srgb, var(--ok) 90%, white 10%);
+      border: 1px solid color-mix(in srgb, var(--ok) 28%, transparent);
+      background: color-mix(in srgb, var(--ok) 14%, transparent);
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--ok);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 18%, transparent);
+    }
+
+    .actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--panel-border);
+      background: transparent;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--accent) 45%, var(--panel-border)); }
+    .btn:active { transform: translateY(0px); }
+    .btn:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 40%, transparent); outline-offset: 2px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 720px) {
+      .grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+    }
+
+    .kv {
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--panel-border);
+      background: color-mix(in srgb, var(--panel) 70%, transparent);
+    }
+    .kv .k {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .kv .v-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .kv code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    footer {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      margin-top: 6px;
+    }
+    a { color: inherit; }
+  </style>
 </head>
-<body style="font-family: Arial; text-align: center; margin-top: 80px;">
-  <h1>🚀 WebApp is UP</h1>
+<body>
+  <main class="wrap" role="main" aria-label="Krkn Chaos Demo status">
+    <header>
+      <div class="brand">
+        <h1>WebApp Status</h1>
+        <p>
+          Live app status and runtime details. Use this page during chaos experiments to quickly verify where traffic is landing.
+        </p>
+      </div>
+    </header>
 
-  <p><b>Pod:</b> ${POD_NAME:-$HOSTNAME}</p>
-  <p><b>Node:</b> ${NODE_NAME}</p>
+    <section class="card" aria-label="Application status">
+      <div class="card-inner">
+        <div class="status-row">
+          <div class="badge" aria-label="Serving traffic">
+            <span class="dot" aria-hidden="true"></span>
+            Serving traffic
+          </div>
 
-  <p style="color: green;"><b>SERVING TRAFFIC</b></p>
+          <div class="actions">
+            <span id="updated" aria-live="polite">Updated just now</span>
+            <button class="btn" type="button" id="refreshBtn" aria-label="Refresh page">Refresh</button>
+          </div>
+        </div>
+
+        <div class="grid" role="list" aria-label="Runtime details">
+          <div class="kv" role="listitem">
+            <span class="k">Pod</span>
+            <div class="v-row">
+              <code id="pod">${POD_NAME}</code>
+              <button class="btn" type="button" data-copy="#pod" aria-label="Copy pod name">Copy</button>
+            </div>
+          </div>
+
+          <div class="kv" role="listitem">
+            <span class="k">Node</span>
+            <div class="v-row">
+              <code id="node">${NODE_NAME}</code>
+              <button class="btn" type="button" data-copy="#node" aria-label="Copy node name">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Tip: during a failover, hit Refresh and watch the Pod/Node change.
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      const updated = document.getElementById("updated");
+      const refreshBtn = document.getElementById("refreshBtn");
+
+      function setUpdated() {
+        const d = new Date();
+        updated.textContent = "Updated " + d.toLocaleTimeString();
+      }
+
+      setUpdated();
+      refreshBtn.addEventListener("click", () => location.reload());
+
+      document.querySelectorAll("[data-copy]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const sel = btn.getAttribute("data-copy");
+          const el = document.querySelector(sel);
+          const text = (el && el.textContent ? el.textContent : "").trim();
+          if (!text) return;
+
+          try {
+            await navigator.clipboard.writeText(text);
+            const prev = btn.textContent;
+            btn.textContent = "Copied";
+            window.setTimeout(() => (btn.textContent = prev), 900);
+          } catch (e) {
+            // Clipboard API may be blocked; fall back silently.
+          }
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
