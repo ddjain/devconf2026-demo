@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Krkn Chaos Demo</title>
+</head>
+<body style="font-family: Arial; text-align: center; margin-top: 80px;">
+  <h1>🚀 WebApp is UP</h1>
+
+  <p><b>Pod:</b> ${POD_NAME:-$HOSTNAME}</p>
+  <p><b>Node:</b> ${NODE_NAME}</p>
+
+  <p style="color: green;"><b>SERVING TRAFFIC</b></p>
+</body>
+</html>
