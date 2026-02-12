@@ -1,0 +1,5 @@
+{
+  "pod": "${POD_NAME}",
+  "node": "${NODE_NAME}",
+  "status": "serving"
+}
